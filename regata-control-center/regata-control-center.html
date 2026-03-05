@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RegataOS Control Center</title>
+  <style>
+    /* ─── Variables ──────────────────────────────────────────────── */
+    :root {
+      --bg:          #f0f2f5;
+      --bg-card:     #ffffff;
+      --bg-sidebar:  #1a1d2e;
+      --bg-header:   #1a1d2e;
+      --text:        #1c1e2b;
+      --text-muted:  #6b7280;
+      --text-light:  #e8eaf0;
+      --text-sidebar:#c8ccd8;
+      --accent:      #5b6cf8;
+      --accent-2:    #7c3aed;
+      --accent-glow: rgba(91,108,248,0.18);
+      --border:      rgba(0,0,0,0.07);
+      --border-card: rgba(0,0,0,0.06);
+      --shadow:      0 2px 12px rgba(0,0,0,0.08);
+      --shadow-hover:0 6px 24px rgba(91,108,248,0.18);
+      --radius:      14px;
+      --radius-sm:   8px;
+      --sidebar-w:   240px;
+      --transition:  0.18s cubic-bezier(.4,0,.2,1);
+      --font:        'Segoe UI', 'Noto Sans', Ubuntu, system-ui, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      --bg:          #12141f;
+      --bg-card:     #1c1f2e;
+      --bg-sidebar:  #0e1018;
+      --bg-header:   #0e1018;
+      --text:        #e8eaf0;
+      --text-muted:  #8892a4;
+      --text-light:  #e8eaf0;
+      --text-sidebar:#c8ccd8;
+      --border:      rgba(255,255,255,0.05);
+      --border-card: rgba(255,255,255,0.06);
+      --shadow:      0 2px 12px rgba(0,0,0,0.35);
+      --shadow-hover:0 6px 24px rgba(91,108,248,0.28);
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); }
+
+    /* ─── Layout ─────────────────────────────────────────────────── */
+    .app { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ─── Sidebar ────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.04);
+      z-index: 10;
+      transition: width var(--transition);
+      overflow: hidden;
+    }
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 18px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 2px 10px rgba(91,108,248,0.4);
+    }
+    .logo-icon svg { width: 18px; height: 18px; fill: white; }
+    .logo-text { color: #fff; font-size: 14px; font-weight: 700; letter-spacing: 0.02em; line-height: 1.2; }
+    .logo-sub { color: #6b7eaa; font-size: 10px; font-weight: 400; letter-spacing: 0.04em; }
+
+    .sidebar-search {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .sidebar-search input {
+      width: 100%;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius-sm);
+      color: var(--text-sidebar);
+      font-size: 13px;
+      padding: 7px 10px 7px 32px;
+      outline: none;
+      font-family: var(--font);
+      transition: border-color var(--transition), background var(--transition);
+      position: relative;
+    }
+    .sidebar-search input:focus {
+      border-color: var(--accent);
+      background: rgba(91,108,248,0.1);
+    }
+    .sidebar-search input::placeholder { color: #4a5568; }
+    .search-wrapper { position: relative; }
+    .search-wrapper::before {
+      content: '';
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      width: 14px; height: 14px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a5568' stroke-width='2.2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") center/contain no-repeat;
+      pointer-events: none;
+    }
+
+    .sidebar-nav { flex: 1; overflow-y: auto; padding: 6px 0; }
+    .sidebar-nav::-webkit-scrollbar { width: 3px; }
+    .sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    .nav-section { padding: 10px 14px 2px; }
+    .nav-section-label {
+      font-size: 10px; font-weight: 700;
+      color: #3d4a6b;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 14px;
+      cursor: pointer;
+      color: var(--text-sidebar);
+      font-size: 13px;
+      font-weight: 500;
+      border-radius: 0;
+      transition: background var(--transition), color var(--transition);
+      user-select: none;
+      position: relative;
+    }
+    .nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+    .nav-item.active {
+      background: rgba(91,108,248,0.18);
+      color: #fff;
+    }
+    .nav-item.active::before {
+      content: '';
+      position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 70%;
+      background: var(--accent);
+      border-radius: 0 3px 3px 0;
+    }
+    .nav-icon {
+      width: 18px; height: 18px;
+      opacity: 0.7;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .nav-item.active .nav-icon, .nav-item:hover .nav-icon { opacity: 1; }
+
+    /* ─── Main Area ───────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .topbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .topbar-title {
+      flex: 1;
+      font-size: 16px; font-weight: 700; color: var(--text);
+    }
+    .topbar-subtitle { font-size: 12px; font-weight: 400; color: var(--text-muted); margin-top: 1px; }
+
+    .topbar-actions { display: flex; align-items: center; gap: 8px; }
+    .btn-icon {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all var(--transition);
+    }
+    .btn-icon:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn-icon svg { width: 16px; height: 16px; }
+
+    /* ─── Content ────────────────────────────────────────────────── */
+    .content { flex: 1; overflow-y: auto; padding: 24px; }
+    .content::-webkit-scrollbar { width: 5px; }
+    .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+    /* ─── Section ────────────────────────────────────────────────── */
+    .section { display: none; animation: fadeIn 0.2s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .section-header { margin-bottom: 20px; }
+    .section-title {
+      font-size: 22px; font-weight: 800; color: var(--text);
+      letter-spacing: -0.02em;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section-title .title-icon {
+      width: 36px; height: 36px;
+      background: var(--accent-glow);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .section-title .title-icon svg { width: 18px; height: 18px; }
+    .section-desc { color: var(--text-muted); font-size: 13px; margin-top: 4px; padding-left: 46px; }
+
+    /* ─── Cards Grid ─────────────────────────────────────────────── */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-top: 16px; }
+    .grid-sm { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+    .grid-lg { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+
+    /* ─── Setting Card ───────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      opacity: 0;
+      transition: opacity var(--transition);
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+      border-color: rgba(91,108,248,0.25);
+    }
+    .card:hover::before { opacity: 1; }
+    .card:active { transform: translateY(0); }
+
+    .card-icon-wrap {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .card-icon-wrap svg { width: 20px; height: 20px; }
+    .card-name {
+      font-size: 13px; font-weight: 700; color: var(--text);
+      line-height: 1.3;
+    }
+    .card-desc {
+      font-size: 11px; color: var(--text-muted); line-height: 1.4;
+    }
+    .card-arrow {
+      position: absolute; right: 14px; bottom: 14px;
+      color: var(--text-muted); opacity: 0;
+      transition: opacity var(--transition), transform var(--transition);
+    }
+    .card:hover .card-arrow { opacity: 1; transform: translateX(2px); }
+
+    /* Icon color themes */
+    .c-blue   { background: rgba(59,130,246,0.12); color: #3b82f6; }
+    .c-purple { background: rgba(124,58,237,0.12); color: #7c3aed; }
+    .c-green  { background: rgba(16,185,129,0.12); color: #10b981; }
+    .c-orange { background: rgba(245,158,11,0.12); color: #f59e0b; }
+    .c-red    { background: rgba(239,68,68,0.12);  color: #ef4444; }
+    .c-indigo { background: rgba(91,108,248,0.14); color: #5b6cf8; }
+    .c-cyan   { background: rgba(6,182,212,0.12);  color: #06b6d4; }
+    .c-pink   { background: rgba(236,72,153,0.12); color: #ec4899; }
+    .c-teal   { background: rgba(20,184,166,0.12); color: #14b8a6; }
+    .c-slate  { background: rgba(100,116,139,0.12);color: #64748b; }
+
+    /* ─── Subsections ────────────────────────────────────────────── */
+    .subsection { margin-top: 28px; }
+    .subsection-title {
+      font-size: 12px; font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ─── Search Results ─────────────────────────────────────────── */
+    #searchSection { display: none; }
+    #searchSection.active { display: block; }
+    .search-empty {
+      text-align: center; padding: 60px 20px; color: var(--text-muted);
+    }
+    .search-empty svg { width: 48px; height: 48px; opacity: 0.3; margin: 0 auto 12px; }
+    .search-highlight { background: rgba(91,108,248,0.2); border-radius: 2px; padding: 0 2px; color: var(--accent); }
+
+    /* ─── Welcome / Home ─────────────────────────────────────────── */
+    .home-hero {
+      background: linear-gradient(135deg, #1a1d2e 0%, #2a1f4e 100%);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+      display: flex; align-items: center; gap: 24px;
+    }
+    .home-hero::before {
+      content: '';
+      position: absolute; right: -40px; top: -40px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(91,108,248,0.2) 0%, transparent 70%);
+    }
+    .home-hero-icon {
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 8px 24px rgba(91,108,248,0.5);
+    }
+    .home-hero-icon svg { width: 32px; height: 32px; fill: white; }
+    .home-hero-text h1 { color: #fff; font-size: 20px; font-weight: 800; }
+    .home-hero-text p { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 4px; }
+
+    .quick-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+    .quick-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-sm);
+      padding: 14px 12px;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 10px;
+      transition: all var(--transition);
+    }
+    .quick-card:hover {
+      border-color: rgba(91,108,248,0.3);
+      background: rgba(91,108,248,0.05);
+      transform: translateY(-1px);
+    }
+    .quick-card-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .quick-card-icon svg { width: 16px; height: 16px; }
+    .quick-card-name { font-size: 12px; font-weight: 600; color: var(--text); }
+
+    /* ─── Badge ──────────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      background: rgba(91,108,248,0.14);
+      color: var(--accent);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      letter-spacing: 0.04em;
+    }
+
+    /* ─── Toast notification ─────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      padding: 12px 18px;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; gap: 10px;
+      z-index: 1000;
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all 0.25s cubic-bezier(.4,0,.2,1);
+      max-width: 300px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
+
+    /* ─── Scrollbar ──────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* ─── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 720px) {
+      .sidebar { width: 56px; min-width: 56px; }
+      .logo-text, .logo-sub, .nav-item span, .nav-section-label, .sidebar-search { display: none; }
+      .nav-item { padding: 10px; justify-content: center; }
+      .nav-item::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ─── Sidebar ──────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Regata Control</div>
+        <div class="logo-sub">Centro de Controle</div>
+      </div>
+    </div>
+
+    <div class="sidebar-search">
+      <div class="search-wrapper">
+        <input type="text" id="globalSearch" placeholder="Buscar configuração…" autocomplete="off" />
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-section"><span class="nav-section-label">Geral</span></div>
+
+      <div class="nav-item active" data-section="home">
+        <span class="nav-icon"><?xml version="1.0"?><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+        <span>Início</span>
+      </div>
+
+      <div class="nav-section"><span class="nav-section-label">Sistema</span></div>
+
+      <div class="nav-item" data-section="aparencia">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></span>
+        <span>Aparência</span>
+      </div>
+
+      <div class="nav-item" data-section="desktop">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+        <span>Desktop e Painel</span>
+      </div>
+
+      <div class="nav-item" data-section="janelas">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/></svg></span>
+        <span>Janelas</span>
+      </div>
+
+      <div class="nav-item" data-section="notificacoes">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+        <span>Notificações</span>
+      </div>
+
+      <div class="nav-section"><span class="nav-section-label">Hardware</span></div>
+
+      <div class="nav-item" data-section="display">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span>
+        <span>Monitor e Tela</span>
+      </div>
+
+      <div class="nav-item" data-section="audio">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></span>
+        <span>Áudio</span>
+      </div>
+
+      <div class="nav-item" data-section="input">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="14"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="14"/><line x1="8" y1="14" x2="16" y2="14"/></svg></span>
+        <span>Teclado e Mouse</span>
+      </div>
+
+      <div class="nav-item" data-section="energia">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 7 13 17l-4-4-6 6"/><polyline points="17 7 23 7 23 13"/></svg></span>
+        <span>Energia</span>
+      </div>
+
+      <div class="nav-item" data-section="impressoras">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></span>
+        <span>Impressoras</span>
+      </div>
+
+      <div class="nav-section"><span class="nav-section-label">Conectividade</span></div>
+
+      <div class="nav-item" data-section="rede">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></span>
+        <span>Rede e Wi-Fi</span>
+      </div>
+
+      <div class="nav-item" data-section="bluetooth">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg></span>
+        <span>Bluetooth</span>
+      </div>
+
+      <div class="nav-section"><span class="nav-section-label">Conta</span></div>
+
+      <div class="nav-item" data-section="usuarios">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+        <span>Usuários</span>
+      </div>
+
+      <div class="nav-item" data-section="seguranca">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+        <span>Segurança</span>
+      </div>
+
+      <div class="nav-section"><span class="nav-section-label">Avançado</span></div>
+
+      <div class="nav-item" data-section="apps">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span>
+        <span>Aplicativos</span>
+      </div>
+
+      <div class="nav-item" data-section="acessibilidade">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="2"/><path d="M8 15h8M10 12v3M14 12v3"/></svg></span>
+        <span>Acessibilidade</span>
+      </div>
+
+      <div class="nav-item" data-section="sistema">
+        <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></span>
+        <span>Sistema</span>
+      </div>
+
+    </nav>
+  </aside>
+
+  <!-- ─── Main ──────────────────────────────────────────────────── -->
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topTitle">Início</div>
+        <div class="topbar-subtitle" id="topSubtitle">Central de Configurações Regata OS</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon" id="themeToggle" title="Alternar tema">
+          <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button class="btn-icon" title="Sobre" onclick="showToast('Regata Control Center v1.0 — Centro de Controle para KDE Plasma 6')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="content" id="mainContent">
+
+      <!-- ─ Search Results ──── -->
+      <div class="section" id="searchSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-indigo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </div>
+            Resultados da Busca
+          </div>
+          <div class="section-desc" id="searchDesc">Resultados para sua busca</div>
+        </div>
+        <div class="grid" id="searchResults"></div>
+        <div class="search-empty" id="searchEmpty" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <p>Nenhum resultado encontrado</p>
+        </div>
+      </div>
+
+      <!-- ─ HOME ──── -->
+      <div class="section active" id="homeSection">
+        <div class="home-hero">
+          <div class="home-hero-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7v10l10 5 10-5V7L12 2z"/></svg>
+          </div>
+          <div class="home-hero-text">
+            <h1>Regata Control Center</h1>
+            <p>Gerencie todas as configurações do seu sistema KDE Plasma 6 em um só lugar. Clique em qualquer item para abrir a configuração diretamente.</p>
+          </div>
+        </div>
+
+        <div class="subsection-title">⚡ Acesso Rápido</div>
+        <div class="quick-grid" id="quickAccess"></div>
+
+        <div class="subsection" style="margin-top: 28px">
+          <div class="subsection-title">📂 Todas as Categorias</div>
+          <div class="grid grid-lg" id="allCategories"></div>
+        </div>
+      </div>
+
+      <!-- ─ APARÊNCIA ──── -->
+      <div class="section" id="aparenciaSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            Aparência
+          </div>
+          <div class="section-desc">Personalize a aparência visual do seu sistema</div>
+        </div>
+
+        <div class="subsection-title">Tema Global</div>
+        <div class="grid" id="aparenciaCards1"></div>
+
+        <div class="subsection">
+          <div class="subsection-title">Estilo e Cores</div>
+          <div class="grid" id="aparenciaCards2"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Fontes e Ícones</div>
+          <div class="grid" id="aparenciaCards3"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Tela de Login e Bloqueio</div>
+          <div class="grid" id="aparenciaCards4"></div>
+        </div>
+      </div>
+
+      <!-- ─ DESKTOP ──── -->
+      <div class="section" id="desktopSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            Desktop e Painel
+          </div>
+          <div class="section-desc">Wallpaper, painel, widgets e comportamento da área de trabalho</div>
+        </div>
+        <div class="grid" id="desktopCards"></div>
+      </div>
+
+      <!-- ─ JANELAS ──── -->
+      <div class="section" id="janelasSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="9" x2="9" y2="21"/></svg></div>
+            Gerenciamento de Janelas
+          </div>
+          <div class="section-desc">Comportamento, animações, atalhos e efeitos de janelas</div>
+        </div>
+
+        <div class="subsection-title">Comportamento de Janelas</div>
+        <div class="grid" id="janelasCards1"></div>
+
+        <div class="subsection">
+          <div class="subsection-title">Efeitos e Animações</div>
+          <div class="grid" id="janelasCards2"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Atalhos e Regras</div>
+          <div class="grid" id="janelasCards3"></div>
+        </div>
+      </div>
+
+      <!-- ─ NOTIFICAÇÕES ──── -->
+      <div class="section" id="notificacoesSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+            Notificações
+          </div>
+          <div class="section-desc">Configure notificações e comportamentos do sistema</div>
+        </div>
+        <div class="grid" id="notificacoesCards"></div>
+      </div>
+
+      <!-- ─ DISPLAY ──── -->
+      <div class="section" id="displaySection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            Monitor e Tela
+          </div>
+          <div class="section-desc">Resolução, disposição de monitores, escala e brilho</div>
+        </div>
+        <div class="grid" id="displayCards"></div>
+      </div>
+
+      <!-- ─ ÁUDIO ──── -->
+      <div class="section" id="audioSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg></div>
+            Áudio
+          </div>
+          <div class="section-desc">Volume, dispositivos de som e configurações de áudio</div>
+        </div>
+        <div class="grid" id="audioCards"></div>
+      </div>
+
+      <!-- ─ INPUT ──── -->
+      <div class="section" id="inputSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="22" height="12" rx="2"/></svg></div>
+            Teclado e Mouse
+          </div>
+          <div class="section-desc">Layout de teclado, velocidade do mouse, touchpad e gestos</div>
+        </div>
+
+        <div class="subsection-title">Teclado</div>
+        <div class="grid" id="inputCards1"></div>
+
+        <div class="subsection">
+          <div class="subsection-title">Mouse e Touchpad</div>
+          <div class="grid" id="inputCards2"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Controles e Gamepads</div>
+          <div class="grid" id="inputCards3"></div>
+        </div>
+      </div>
+
+      <!-- ─ ENERGIA ──── -->
+      <div class="section" id="energiaSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            Energia e Bateria
+          </div>
+          <div class="section-desc">Perfis de energia, suspensão e gerenciamento de bateria</div>
+        </div>
+        <div class="grid" id="energiaCards"></div>
+      </div>
+
+      <!-- ─ IMPRESSORAS ──── -->
+      <div class="section" id="impressorasSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></div>
+            Impressoras e Scanners
+          </div>
+          <div class="section-desc">Gerenciar impressoras, scanners e trabalhos de impressão</div>
+        </div>
+        <div class="grid" id="impressorasCards"></div>
+      </div>
+
+      <!-- ─ REDE ──── -->
+      <div class="section" id="redeSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg></div>
+            Rede e Wi-Fi
+          </div>
+          <div class="section-desc">Conexões, VPN, proxy e configurações de rede</div>
+        </div>
+        <div class="grid" id="redeCards"></div>
+      </div>
+
+      <!-- ─ BLUETOOTH ──── -->
+      <div class="section" id="bluetoothSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg></div>
+            Bluetooth
+          </div>
+          <div class="section-desc">Emparelhamento e gerenciamento de dispositivos Bluetooth</div>
+        </div>
+        <div class="grid" id="bluetoothCards"></div>
+      </div>
+
+      <!-- ─ USUÁRIOS ──── -->
+      <div class="section" id="usuariosSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+            Usuários e Contas
+          </div>
+          <div class="section-desc">Gerenciamento de contas de usuário e serviços online</div>
+        </div>
+        <div class="grid" id="usuariosCards"></div>
+      </div>
+
+      <!-- ─ SEGURANÇA ──── -->
+      <div class="section" id="segurancaSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            Segurança e Privacidade
+          </div>
+          <div class="section-desc">Senha, firewall, permissões e privacidade do sistema</div>
+        </div>
+        <div class="grid" id="segurancaCards"></div>
+      </div>
+
+      <!-- ─ APPS ──── -->
+      <div class="section" id="appsSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+            Aplicativos
+          </div>
+          <div class="section-desc">Apps padrão, inicialização automática e permissões</div>
+        </div>
+
+        <div class="subsection-title">Gerenciamento de Apps</div>
+        <div class="grid" id="appsCards1"></div>
+
+        <div class="subsection">
+          <div class="subsection-title">Integração com o Sistema</div>
+          <div class="grid" id="appsCards2"></div>
+        </div>
+      </div>
+
+      <!-- ─ ACESSIBILIDADE ──── -->
+      <div class="section" id="acessibilidadeSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="8" r="2"/><path d="M8 15h8M10 12v3M14 12v3"/></svg></div>
+            Acessibilidade
+          </div>
+          <div class="section-desc">Leitores de tela, ampliação e recursos de acessibilidade</div>
+        </div>
+        <div class="grid" id="acessibilidadeCards"></div>
+      </div>
+
+      <!-- ─ SISTEMA ──── -->
+      <div class="section" id="sistemaSection">
+        <div class="section-header">
+          <div class="section-title">
+            <div class="title-icon c-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></div>
+            Sistema e Inicialização
+          </div>
+          <div class="section-desc">Informações do sistema, inicialização, data e hora</div>
+        </div>
+
+        <div class="subsection-title">Sobre e Diagnóstico</div>
+        <div class="grid" id="sistemaCards1"></div>
+
+        <div class="subsection">
+          <div class="subsection-title">Inicialização e Sessão</div>
+          <div class="grid" id="sistemaCards2"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Idioma e Região</div>
+          <div class="grid" id="sistemaCards3"></div>
+        </div>
+
+        <div class="subsection">
+          <div class="subsection-title">Data e Hora</div>
+          <div class="grid" id="sistemaCards4"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   DATA — All KCM settings with commands
+   ════════════════════════════════════════════════════════════════ */
+const SETTINGS = {
+
+  // ── APARÊNCIA ────────────────────────────────────────────────
+  aparencia1: [
+    { name: 'Tema Global',        desc: 'Aplicar tema completo ao sistema',     color: 'c-purple', cmd: 'kcmshell6 kcm_lookandfeel', icon: 'palette' },
+    { name: 'Tema do Plasma',     desc: 'Estilo de painéis e widgets',          color: 'c-purple', cmd: 'kcmshell6 kcm_plasmadesktoptheme', icon: 'layers' },
+    { name: 'Papel de Parede',    desc: 'Imagem e estilo do fundo da tela',     color: 'c-blue',   cmd: 'plasma-open-settings kcm_wallpaper', icon: 'image' },
+  ],
+  aparencia2: [
+    { name: 'Estilo de Apps',     desc: 'Aparência de botões e widgets Qt',    color: 'c-indigo', cmd: 'kcmshell6 kcm_style', icon: 'brush' },
+    { name: 'Cores do Sistema',   desc: 'Esquema de cores do ambiente',         color: 'c-pink',   cmd: 'kcmshell6 kcm_colors', icon: 'droplet' },
+    { name: 'Decoração de Janelas',desc: 'Barra de título e bordas',           color: 'c-purple', cmd: 'kcmshell6 kcm_kwin_decoration', icon: 'square' },
+    { name: 'Cursor do Mouse',    desc: 'Aparência do ponteiro',                color: 'c-slate',  cmd: 'kcmshell6 kcm_cursortheme', icon: 'mouse' },
+    { name: 'Cor de Destaque',    desc: 'Cor de realce de seleções',            color: 'c-indigo', cmd: 'kcmshell6 kcm_colors', icon: 'zap' },
+  ],
+  aparencia3: [
+    { name: 'Fontes',             desc: 'Família e tamanho de fontes',          color: 'c-blue',   cmd: 'kcmshell6 kcm_fonts', icon: 'type' },
+    { name: 'Temas de Ícones',    desc: 'Conjunto de ícones do sistema',        color: 'c-orange', cmd: 'kcmshell6 kcm_icons', icon: 'star' },
+    { name: 'Emoticons',          desc: 'Pacotes de emoticons do sistema',      color: 'c-pink',   cmd: 'kcmshell6 kcm_emoticons', icon: 'smile' },
+  ],
+  aparencia4: [
+    { name: 'Tela de Login (SDDM)',  desc: 'Aparência e layout do login',      color: 'c-indigo', cmd: 'kcmshell6 kcm_sddm', icon: 'lock' },
+    { name: 'Tela de Bloqueio',      desc: 'Wallpaper e estilo da tela bloqueada', color: 'c-blue', cmd: 'kcmshell6 kcm_screenlocker', icon: 'shield' },
+    { name: 'Tela de Splash',        desc: 'Animação de inicialização do Plasma', color: 'c-purple', cmd: 'kcmshell6 kcm_splashscreen', icon: 'loader' },
+  ],
+
+  // ── DESKTOP ──────────────────────────────────────────────────
+  desktop: [
+    { name: 'Configurar Desktop',  desc: 'Layout e comportamento geral da área de trabalho', color: 'c-blue',  cmd: 'qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "var d=desktops()[0];d.wallpaperPlugin=d.wallpaperPlugin"', icon: 'monitor' },
+    { name: 'Painel (Taskbar)',    desc: 'Adicionar, mover e configurar painéis',   color: 'c-indigo', cmd: 'plasma-open-settings kcm_taskmanager', icon: 'sidebar' },
+    { name: 'Widgets do Plasma',  desc: 'Adicionar e gerenciar plasmoids',          color: 'c-purple', cmd: 'plasma-open-settings', icon: 'grid' },
+    { name: 'Atividades',         desc: 'Criar e gerenciar atividades virtuais',    color: 'c-green',  cmd: 'kcmshell6 kcm_activities', icon: 'layout' },
+    { name: 'Áreas de Trabalho Virtuais', desc: 'Múltiplas áreas de trabalho', color: 'c-cyan', cmd: 'kcmshell6 kcm_kwin_virtualdesktops', icon: 'copy' },
+    { name: 'Configurações de KRunner', desc: 'Busca rápida Alt+F2',           color: 'c-orange', cmd: 'kcmshell6 kcm_plasmasearch', icon: 'search' },
+    { name: 'Localização de Arquivos', desc: 'Indexação Baloo e busca de arquivos', color: 'c-teal', cmd: 'kcmshell6 kcm_baloofile', icon: 'folder' },
+    { name: 'Miniaplicativos de Sistema', desc: 'Área de notificação e bandejas', color: 'c-slate', cmd: 'plasma-open-settings kcm_statusnotifieritem', icon: 'bell' },
+  ],
+
+  // ── JANELAS ──────────────────────────────────────────────────
+  janelas1: [
+    { name: 'Comportamento de Janelas', desc: 'Foco, movimento e redimensionamento', color: 'c-indigo', cmd: 'kcmshell6 kcm_kwin_behaviour', icon: 'move' },
+    { name: 'Ações de Janelas',  desc: 'Clique duplo, botões e ações da barra', color: 'c-blue',  cmd: 'kcmshell6 kcm_kwin_actions', icon: 'click' },
+    { name: 'Comportamento de Aplicativos', desc: 'Como apps se abrem e ganham foco', color: 'c-purple', cmd: 'kcmshell6 kcm_kwin_behaviour', icon: 'zap' },
+  ],
+  janelas2: [
+    { name: 'Efeitos do Desktop', desc: 'Animações, blur, sombras e efeitos visuais', color: 'c-pink',   cmd: 'kcmshell6 kcm_kwin_effects', icon: 'sparkles' },
+    { name: 'Compositing',       desc: 'Backend OpenGL e anti-aliasing',        color: 'c-cyan',   cmd: 'kcmshell6 kcm_kwin_compositing', icon: 'layers' },
+    { name: 'Transições de Área de Trabalho', desc: 'Animação ao trocar desktop', color: 'c-purple', cmd: 'kcmshell6 kcm_kwin_desktopeffects', icon: 'refresh-cw' },
+  ],
+  janelas3: [
+    { name: 'Atalhos do KWin',   desc: 'Teclas de atalho para janelas',         color: 'c-orange', cmd: 'kcmshell6 kcm_kwin_shortcuts', icon: 'command' },
+    { name: 'Regras de Janelas', desc: 'Regras específicas por aplicativo',      color: 'c-red',    cmd: 'kcmshell6 kcm_kwin_rules', icon: 'sliders' },
+    { name: 'Alternador de Tarefas', desc: 'Alt+Tab e estilo do task switcher', color: 'c-teal',   cmd: 'kcmshell6 kcm_kwintabbox', icon: 'tab' },
+    { name: 'Bordas de Tela',    desc: 'Ações ao mover mouse para bordas',      color: 'c-indigo', cmd: 'kcmshell6 kcm_kwin_screenedges', icon: 'maximize' },
+  ],
+
+  // ── NOTIFICAÇÕES ─────────────────────────────────────────────
+  notificacoes: [
+    { name: 'Notificações',      desc: 'Posição, duração e configuração global',color: 'c-orange', cmd: 'kcmshell6 kcm_notifications', icon: 'bell' },
+    { name: 'Sons do Sistema',   desc: 'Sons de eventos e notificações',        color: 'c-green',  cmd: 'kcmshell6 kcm_hardware/bell', icon: 'volume-2' },
+    { name: 'Modo Não Perturbe', desc: 'Silenciar notificações por período',    color: 'c-slate',  cmd: 'kcmshell6 kcm_notifications', icon: 'moon' },
+  ],
+
+  // ── DISPLAY ──────────────────────────────────────────────────
+  display: [
+    { name: 'Configurações de Monitor', desc: 'Resolução, taxa de atualização e escala', color: 'c-cyan',   cmd: 'kcmshell6 kcm_kscreen', icon: 'monitor' },
+    { name: 'Escala da Interface', desc: 'DPI e fator de escala por monitor',    color: 'c-blue',   cmd: 'kcmshell6 kcm_kscreen', icon: 'zoom-in' },
+    { name: 'Orientação da Tela', desc: 'Rotação e espelhamento de monitores',  color: 'c-indigo', cmd: 'kcmshell6 kcm_kscreen', icon: 'rotate-cw' },
+    { name: 'Night Color',        desc: 'Temperatura de cor para reduzir fadiga', color: 'c-orange', cmd: 'kcmshell6 kcm_nightlight', icon: 'sun' },
+    { name: 'HDR e Wide Color Gamut', desc: 'Configurações de HDR (Plasma 6)', color: 'c-purple', cmd: 'kcmshell6 kcm_kscreen', icon: 'eye' },
+  ],
+
+  // ── ÁUDIO ────────────────────────────────────────────────────
+  audio: [
+    { name: 'Volume e Dispositivos', desc: 'Controle de volume e saída de áudio', color: 'c-green',  cmd: 'kcmshell6 kcm_pulseaudio', icon: 'volume-2' },
+    { name: 'Configurações de Áudio', desc: 'PipeWire/PulseAudio e dispositivos', color: 'c-teal',  cmd: 'pavucontrol', icon: 'sliders' },
+    { name: 'Entrada de Áudio (Mic)', desc: 'Microfone e entrada de som',       color: 'c-cyan',   cmd: 'kcmshell6 kcm_pulseaudio', icon: 'mic' },
+  ],
+
+  // ── INPUT ────────────────────────────────────────────────────
+  input1: [
+    { name: 'Layout do Teclado',  desc: 'Idioma, layout e variante de teclado', color: 'c-teal',   cmd: 'kcmshell6 kcm_keyboard', icon: 'keyboard' },
+    { name: 'Comportamento do Teclado', desc: 'Velocidade de repetição e atraso', color: 'c-blue',  cmd: 'kcmshell6 kcm_keyboard', icon: 'type' },
+    { name: 'Atalhos de Teclado', desc: 'Atalhos globais e personalizados',     color: 'c-indigo', cmd: 'kcmshell6 kcm_keys', icon: 'command' },
+    { name: 'Atalhos Globais',    desc: 'Configuração de teclas de atalho global', color: 'c-purple', cmd: 'kcmshell6 kcm_keys', icon: 'zap' },
+  ],
+  input2: [
+    { name: 'Mouse',              desc: 'Velocidade, aceleração e botões',      color: 'c-teal',   cmd: 'kcmshell6 kcm_mouse', icon: 'mouse' },
+    { name: 'Touchpad',           desc: 'Gestos, rolagem e sensibilidade',      color: 'c-cyan',   cmd: 'kcmshell6 kcm_touchpad', icon: 'hand' },
+    { name: 'Tela Sensível ao Toque', desc: 'Calibrar touchscreen e gestos',   color: 'c-blue',   cmd: 'kcmshell6 kcm_tablet', icon: 'tablet' },
+    { name: 'Mesa Digitalizadora', desc: 'Configurar tablet gráfico Wacom',    color: 'c-purple', cmd: 'kcmshell6 kcm_tablet', icon: 'pen-tool' },
+  ],
+  input3: [
+    { name: 'Joystick e Gamepad', desc: 'Controladores de jogo conectados',    color: 'c-orange', cmd: 'kcmshell6 kcm_joystick', icon: 'gamepad' },
+  ],
+
+  // ── ENERGIA ──────────────────────────────────────────────────
+  energia: [
+    { name: 'Gerenciamento de Energia', desc: 'Perfis: Economia, Balanceado, Performance', color: 'c-orange', cmd: 'kcmshell6 kcm_powerdevil', icon: 'battery' },
+    { name: 'Suspensão e Hibernação', desc: 'Quando suspender e hibernar',    color: 'c-yellow', cmd: 'kcmshell6 kcm_powerdevil', icon: 'moon' },
+    { name: 'Brilho da Tela',        desc: 'Comportamento automático do brilho', color: 'c-cyan',  cmd: 'kcmshell6 kcm_powerdevil', icon: 'sun' },
+    { name: 'Estatísticas de Energia', desc: 'Histórico de consumo energético', color: 'c-green', cmd: 'kcmshell6 kcm_energyinfo', icon: 'trending-down' },
+  ],
+
+  // ── IMPRESSORAS ──────────────────────────────────────────────
+  impressoras: [
+    { name: 'Impressoras',        desc: 'Adicionar e gerenciar impressoras',    color: 'c-slate',  cmd: 'kcmshell6 kcm_printer_manager', icon: 'printer' },
+    { name: 'Scanners',           desc: 'Dispositivos de digitalização',        color: 'c-blue',   cmd: 'skanlite', icon: 'scan' },
+  ],
+
+  // ── REDE ─────────────────────────────────────────────────────
+  rede: [
+    { name: 'Conexões de Rede',   desc: 'Wi-Fi, Ethernet e configurações',     color: 'c-blue',   cmd: 'kcmshell6 kcm_networkmanagement', icon: 'wifi' },
+    { name: 'VPN',                desc: 'Configurar e gerenciar VPNs',          color: 'c-indigo', cmd: 'kcmshell6 kcm_networkmanagement', icon: 'lock' },
+    { name: 'Proxy',              desc: 'Servidor proxy do sistema',            color: 'c-slate',  cmd: 'kcmshell6 kcm_proxy', icon: 'globe' },
+    { name: 'Firewall (UFW)',     desc: 'Regras e status do firewall',          color: 'c-red',    cmd: 'gufw', icon: 'shield' },
+    { name: 'Compartilhamento',   desc: 'Samba, NFS e compartilhamentos',      color: 'c-green',  cmd: 'kcmshell6 kcm_sharing', icon: 'share-2' },
+    { name: 'Preferências de Rede', desc: 'DNS, IPv6 e configurações avançadas', color: 'c-cyan', cmd: 'kcmshell6 kcm_networkmanagement', icon: 'settings' },
+  ],
+
+  // ── BLUETOOTH ────────────────────────────────────────────────
+  bluetooth: [
+    { name: 'Dispositivos Bluetooth', desc: 'Emparelhar e conectar dispositivos', color: 'c-indigo', cmd: 'kcmshell6 kcm_bluetooth', icon: 'bluetooth' },
+    { name: 'Configurações Bluetooth', desc: 'Visibilidade e comportamento',   color: 'c-blue',   cmd: 'kcmshell6 kcm_bluetooth', icon: 'settings' },
+  ],
+
+  // ── USUÁRIOS ─────────────────────────────────────────────────
+  usuarios: [
+    { name: 'Contas de Usuário',  desc: 'Gerenciar usuários do sistema',        color: 'c-green',  cmd: 'kcmshell6 kcm_users', icon: 'user' },
+    { name: 'Contas Online',      desc: 'Google, Nextcloud e serviços web',     color: 'c-blue',   cmd: 'kcmshell6 kcm_kaccounts', icon: 'cloud' },
+    { name: 'Carteiras KWallet',  desc: 'Gerenciador de senhas e carteiras',    color: 'c-orange', cmd: 'kcmshell6 kcm_kwallet5', icon: 'key' },
+    { name: 'Sincronização KDE',  desc: 'Sincronizar configurações na nuvem',   color: 'c-purple', cmd: 'kcmshell6 kcm_kaccounts', icon: 'refresh-cw' },
+  ],
+
+  // ── SEGURANÇA ────────────────────────────────────────────────
+  seguranca: [
+    { name: 'Senha de Usuário',   desc: 'Alterar senha do usuário atual',       color: 'c-red',    cmd: 'kcmshell6 kcm_users', icon: 'lock' },
+    { name: 'Privacidade',        desc: 'Histórico de arquivos e atividades',   color: 'c-orange', cmd: 'kcmshell6 kcm_kprivacy', icon: 'eye-off' },
+    { name: 'Permissões de Apps', desc: 'Controle de acesso de aplicativos',    color: 'c-purple', cmd: 'kcmshell6 kcm_flatpak', icon: 'shield' },
+    { name: 'Bloqueio de Tela',   desc: 'Auto-bloqueio e senha de desbloqueio', color: 'c-red',    cmd: 'kcmshell6 kcm_screenlocker', icon: 'lock' },
+    { name: 'KDE Vault',          desc: 'Pastas criptografadas',                color: 'c-indigo', cmd: 'plasma-open-settings kcm_plasmavault', icon: 'hard-drive' },
+  ],
+
+  // ── APPS ─────────────────────────────────────────────────────
+  apps1: [
+    { name: 'Apps Padrão',        desc: 'Navegador, email, editor padrão',      color: 'c-purple', cmd: 'kcmshell6 kcm_componentchooser', icon: 'star' },
+    { name: 'Associações de Arquivo', desc: 'Qual app abre cada tipo de arquivo', color: 'c-blue', cmd: 'kcmshell6 kcm_filetypes', icon: 'file' },
+    { name: 'Localização (Plasma Search)', desc: 'Indexação e busca de arquivos', color: 'c-teal', cmd: 'kcmshell6 kcm_baloofile', icon: 'search' },
+    { name: 'RegataOS Store', desc: 'Loja de aplicativos Regata',          color: 'c-green',  cmd: 'regataos-store', icon: 'package' },
+  ],
+  apps2: [
+    { name: 'Inicialização Automática', desc: 'Programas que iniciam com o sistema', color: 'c-orange', cmd: 'kcmshell6 kcm_autostart', icon: 'play' },
+    { name: 'Plano de Fundo de Serviços', desc: 'Daemons e serviços do KDE',   color: 'c-slate',  cmd: 'kcmshell6 kcm_background_services', icon: 'server' },
+    { name: 'Localização de Aplicativos', desc: 'Onde apps são instalados',    color: 'c-cyan',   cmd: 'kcmshell6 kcm_componentchooser', icon: 'folder' },
+    { name: 'Integração com Navegador', desc: 'Plasma Browser Integration',   color: 'c-blue',   cmd: 'kcmshell6 kcm_browser_integration', icon: 'globe' },
+  ],
+
+  // ── ACESSIBILIDADE ───────────────────────────────────────────
+  acessibilidade: [
+    { name: 'Acessibilidade',     desc: 'Leitor de tela, teclas pegajosas',     color: 'c-teal',   cmd: 'kcmshell6 kcm_accessibility', icon: 'eye' },
+    { name: 'Aumento de Texto',   desc: 'Zoom de fonte e legibilidade',         color: 'c-blue',   cmd: 'kcmshell6 kcm_fonts', icon: 'zoom-in' },
+    { name: 'Animações',          desc: 'Reduzir movimento e animações',        color: 'c-purple', cmd: 'kcmshell6 kcm_kwin_effects', icon: 'activity' },
+    { name: 'Alto Contraste',     desc: 'Tema de alto contraste para daltonismo', color: 'c-orange', cmd: 'kcmshell6 kcm_colors', icon: 'contrast' },
+  ],
+
+  // ── SISTEMA ──────────────────────────────────────────────────
+  sistema1: [
+    { name: 'Sobre este Sistema', desc: 'Hardware, kernel e versão do OS',      color: 'c-slate',  cmd: 'kcmshell6 kcm_about-distro', icon: 'info' },
+    { name: 'Monitor do Sistema', desc: 'CPU, RAM, disco e processos',          color: 'c-green',  cmd: 'ksysguard', icon: 'activity' },
+    { name: 'Logs do Sistema',    desc: 'Journal e logs do kernel',             color: 'c-red',    cmd: 'systemctl status', icon: 'file-text' },
+    { name: 'SMART dos Discos',   desc: 'Saúde dos discos rígidos',             color: 'c-orange', cmd: 'kcmshell6 kcm_disks', icon: 'hard-drive' },
+  ],
+  sistema2: [
+    { name: 'Autostart / Inicialização', desc: 'Programas e scripts ao iniciar', color: 'c-orange', cmd: 'kcmshell6 kcm_autostart', icon: 'play-circle' },
+    { name: 'Tela de Login (SDDM)',  desc: 'Configurações da tela de login',   color: 'c-indigo', cmd: 'kcmshell6 kcm_sddm', icon: 'log-in' },
+    { name: 'Sessão da Área de Trabalho', desc: 'Restaurar sessão ao iniciar', color: 'c-blue',   cmd: 'kcmshell6 kcm_smserver', icon: 'refresh-cw' },
+    { name: 'Plymouth (Splash de Boot)', desc: 'Tela de inicialização do boot', color: 'c-purple', cmd: 'kcmshell6 kcm_plymouth', icon: 'loader' },
+  ],
+  sistema3: [
+    { name: 'Idioma do Sistema',  desc: 'Idioma principal e localização',       color: 'c-blue',   cmd: 'kcmshell6 kcm_translations', icon: 'globe' },
+    { name: 'Formatos Regionais', desc: 'Moeda, data, hora e unidades',         color: 'c-teal',   cmd: 'kcmshell6 kcm_regionandlang', icon: 'map-pin' },
+    { name: 'Idiomas Disponíveis', desc: 'Instalar pacotes de idioma',          color: 'c-green',  cmd: 'kcmshell6 kcm_translations', icon: 'download' },
+  ],
+  sistema4: [
+    { name: 'Data e Hora',        desc: 'Acertar data, hora e fuso horário',   color: 'c-orange', cmd: 'kcmshell6 kcm_clock', icon: 'clock' },
+    { name: 'Sincronização NTP',  desc: 'Sincronizar relógio pela internet',   color: 'c-cyan',   cmd: 'kcmshell6 kcm_clock', icon: 'wifi' },
+  ],
+};
+
+/* ════════════════════════════════════════════════════════════════
+   ICONS SVG Map
+   ════════════════════════════════════════════════════════════════ */
+const ICONS = {
+  palette:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
+  layers:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  image:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+  brush:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1 1 2.48 1.02 3.5 1.02 1.66 0 3-1.34 3-3s-1.34-3.06-1.5-3.06z"/></svg>`,
+  droplet:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`,
+  square:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>`,
+  mouse:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="7"/><line x1="12" y1="6" x2="12" y2="10"/></svg>`,
+  zap:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>`,
+  type:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`,
+  star:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  smile:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>`,
+  lock:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  shield:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`,
+  loader:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>`,
+  monitor:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+  sidebar:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>`,
+  grid:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`,
+  layout:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>`,
+  copy:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  search:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>`,
+  folder:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>`,
+  bell:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`,
+  move:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="5 9 2 12 5 15"/><polyline points="9 5 12 2 15 5"/><polyline points="15 19 12 22 9 19"/><polyline points="19 9 22 12 19 15"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>`,
+  click:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9V4.5M9 9H4.5M9 9 3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5 5.25 5.25"/></svg>`,
+  sparkles:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>`,
+  'refresh-cw': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+  command:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>`,
+  sliders:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>`,
+  tab:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3H3"/><path d="M7 12H3"/><path d="M15.5 7L12 12l3.5 5"/><path d="M21 21H3"/></svg>`,
+  maximize:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>`,
+  battery:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="18" height="12" rx="2"/><line x1="23" y1="13" x2="23" y2="11"/><line x1="7" y1="10" x2="7" y2="14"/><line x1="5" y1="12" x2="9" y2="12"/><line x1="13" y1="12" x2="15" y2="12"/></svg>`,
+  moon:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+  sun:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`,
+  'trending-down': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>`,
+  printer:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+  scan:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>`,
+  wifi:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>`,
+  globe:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`,
+  'share-2':    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`,
+  settings:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0M12 2v2M12 20v2M2 12h2M20 12h2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`,
+  bluetooth:    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6.5 6.5 17.5 17.5 12 23 12 1 17.5 6.5 6.5 17.5"/></svg>`,
+  user:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  cloud:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>`,
+  key:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`,
+  'eye-off':    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`,
+  'hard-drive': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="12" x2="2" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 17.04 4H6.96a2 2 0 0 0-1.5.67z"/><line x1="6" y1="16" x2="6.01" y2="16"/><line x1="10" y1="16" x2="10.01" y2="16"/></svg>`,
+  file:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`,
+  package:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`,
+  play:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+  server:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`,
+  eye:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`,
+  'zoom-in':    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>`,
+  activity:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`,
+  contrast:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z"/></svg>`,
+  info:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+  'file-text':  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
+  'play-circle':`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`,
+  'log-in':     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>`,
+  download:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  'map-pin':    `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>`,
+  clock:        `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  keyboard:     `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="6" y1="14" x2="18" y2="14"/></svg>`,
+  hand:         `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2"/><path d="M14 10V4a2 2 0 0 0-2-2 2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8"/><path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>`,
+  tablet:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>`,
+  'pen-tool':   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="m2 2 7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`,
+  gamepad:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><line x1="15" y1="13" x2="15.01" y2="13"/><line x1="18" y1="11" x2="18.01" y2="11"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>`,
+  'volume-2':   `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`,
+  mic:          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>`,
+  'rotate-cw':  `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>`,
+  'home':       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+};
+
+function getIcon(name) {
+  return ICONS[name] || ICONS['settings'];
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CATEGORY META for Home page
+   ════════════════════════════════════════════════════════════════ */
+const CATEGORIES = [
+  { id: 'aparencia',      name: 'Aparência',          desc: 'Temas, cores, fontes e ícones',     color: 'c-purple', icon: 'palette' },
+  { id: 'desktop',        name: 'Desktop e Painel',   desc: 'Wallpaper, widgets e painéis',      color: 'c-blue',   icon: 'monitor' },
+  { id: 'janelas',        name: 'Janelas e KWin',     desc: 'Efeitos, animações e atalhos',      color: 'c-indigo', icon: 'layers' },
+  { id: 'notificacoes',   name: 'Notificações',       desc: 'Alertas e sons do sistema',         color: 'c-orange', icon: 'bell' },
+  { id: 'display',        name: 'Monitor e Tela',     desc: 'Resolução, escala e Night Color',   color: 'c-cyan',   icon: 'monitor' },
+  { id: 'audio',          name: 'Áudio',              desc: 'Volume e dispositivos de som',      color: 'c-green',  icon: 'volume-2' },
+  { id: 'input',          name: 'Teclado e Mouse',    desc: 'Layout, gestos e touchpad',         color: 'c-teal',   icon: 'keyboard' },
+  { id: 'energia',        name: 'Energia',            desc: 'Bateria e perfis de energia',       color: 'c-orange', icon: 'battery' },
+  { id: 'impressoras',    name: 'Impressoras',        desc: 'Impressoras e scanners',            color: 'c-slate',  icon: 'printer' },
+  { id: 'rede',           name: 'Rede e Wi-Fi',       desc: 'Conexões, VPN e proxy',             color: 'c-blue',   icon: 'wifi' },
+  { id: 'bluetooth',      name: 'Bluetooth',          desc: 'Dispositivos sem fio',              color: 'c-indigo', icon: 'bluetooth' },
+  { id: 'usuarios',       name: 'Usuários',           desc: 'Contas locais e online',            color: 'c-green',  icon: 'user' },
+  { id: 'seguranca',      name: 'Segurança',          desc: 'Senha, privacidade e firewall',     color: 'c-red',    icon: 'shield' },
+  { id: 'apps',           name: 'Aplicativos',        desc: 'Apps padrão e inicialização',       color: 'c-purple', icon: 'package' },
+  { id: 'acessibilidade', name: 'Acessibilidade',     desc: 'Leitores de tela e acessibilidade', color: 'c-teal',   icon: 'eye' },
+  { id: 'sistema',        name: 'Sistema',            desc: 'Informações e inicialização',       color: 'c-slate',  icon: 'settings' },
+];
+
+const QUICK_ACCESS = ['aparencia', 'display', 'rede', 'audio', 'energia', 'input', 'seguranca', 'apps'];
+
+/* ════════════════════════════════════════════════════════════════
+   FLAT LIST for search
+   ════════════════════════════════════════════════════════════════ */
+let ALL_SETTINGS = [];
+function buildSearchIndex() {
+  Object.entries(SETTINGS).forEach(([key, items]) => {
+    items.forEach(item => {
+      ALL_SETTINGS.push({ ...item, _key: key });
+    });
+  });
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CARD BUILDER
+   ════════════════════════════════════════════════════════════════ */
+function buildCard(item, highlight = '') {
+  let name = item.name;
+  let desc = item.desc;
+  if (highlight) {
+    const re = new RegExp(`(${highlight.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    name = name.replace(re, '<span class="search-highlight">$1</span>');
+    desc = desc.replace(re, '<span class="search-highlight">$1</span>');
+  }
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-icon-wrap ${item.color}">${getIcon(item.icon)}</div>
+    <div class="card-name">${name}</div>
+    <div class="card-desc">${desc}</div>
+    <div class="card-arrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>`;
+
+  card.addEventListener('click', () => launchSetting(item));
+  return card;
+}
+
+function populateGrid(containerId, items) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = '';
+  items.forEach(item => el.appendChild(buildCard(item)));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LAUNCH SETTING
+   ════════════════════════════════════════════════════════════════ */
+function launchSetting(item) {
+  // Try to open via Qt/xdg-open bridge, fallback to showing command
+  const cmd = item.cmd;
+
+  // QWebChannel or window.location protocol for Qt WebEngine
+  if (window.qt && window.qt.webChannelTransport) {
+    // Qt WebChannel integration
+    new QWebChannel(window.qt.webChannelTransport, function(channel) {
+      if (channel.objects.bridge) {
+        channel.objects.bridge.runCommand(cmd);
+      }
+    });
+  } else if (window.regataShell && window.regataShell.runCommand) {
+    window.regataShell.runCommand(cmd);
+  } else {
+    // Fallback: show command in toast and attempt xdg-open like
+    showToast(`Abrindo: ${item.name}`);
+    // Try the registered URI scheme
+    try {
+      const uri = `regata-settings://?cmd=${encodeURIComponent(cmd)}`;
+      window.location.href = uri;
+    } catch(e) {}
+  }
+
+  showToast(`Abrindo ${item.name}…`);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TOAST
+   ════════════════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  const toastMsg = document.getElementById('toastMsg');
+  toastMsg.textContent = msg;
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NAVIGATION
+   ════════════════════════════════════════════════════════════════ */
+const SECTION_META = {
+  home:           { title: 'Início',                subtitle: 'Central de Configurações Regata OS' },
+  aparencia:      { title: 'Aparência',             subtitle: 'Temas, cores, fontes e ícones' },
+  desktop:        { title: 'Desktop e Painel',      subtitle: 'Wallpaper, widgets e painéis' },
+  janelas:        { title: 'Janelas e KWin',        subtitle: 'Efeitos, animações e atalhos' },
+  notificacoes:   { title: 'Notificações',          subtitle: 'Alertas e sons do sistema' },
+  display:        { title: 'Monitor e Tela',        subtitle: 'Resolução, escala e Night Color' },
+  audio:          { title: 'Áudio',                 subtitle: 'Volume e dispositivos de som' },
+  input:          { title: 'Teclado e Mouse',       subtitle: 'Layout, gestos e touchpad' },
+  energia:        { title: 'Energia e Bateria',     subtitle: 'Perfis de energia e suspensão' },
+  impressoras:    { title: 'Impressoras',           subtitle: 'Impressoras e scanners' },
+  rede:           { title: 'Rede e Wi-Fi',          subtitle: 'Conexões, VPN e proxy' },
+  bluetooth:      { title: 'Bluetooth',             subtitle: 'Dispositivos sem fio' },
+  usuarios:       { title: 'Usuários',              subtitle: 'Contas locais e online' },
+  seguranca:      { title: 'Segurança',             subtitle: 'Privacidade, senha e firewall' },
+  apps:           { title: 'Aplicativos',           subtitle: 'Apps padrão e inicialização' },
+  acessibilidade: { title: 'Acessibilidade',        subtitle: 'Recursos de acessibilidade' },
+  sistema:        { title: 'Sistema',               subtitle: 'Informações e inicialização' },
+};
+
+function navigateTo(section) {
+  // hide all sections
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const targetSection = document.getElementById(section + 'Section');
+  if (targetSection) targetSection.classList.add('active');
+
+  const navItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+  if (navItem) navItem.classList.add('active');
+
+  const meta = SECTION_META[section] || { title: section, subtitle: '' };
+  document.getElementById('topTitle').textContent = meta.title;
+  document.getElementById('topSubtitle').textContent = meta.subtitle;
+
+  // Clear search
+  document.getElementById('globalSearch').value = '';
+
+  // Scroll content to top
+  document.getElementById('mainContent').scrollTop = 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SEARCH
+   ════════════════════════════════════════════════════════════════ */
+function doSearch(query) {
+  const q = query.trim().toLowerCase();
+
+  if (!q) {
+    document.getElementById('searchSection').classList.remove('active');
+    navigateTo('home');
+    return;
+  }
+
+  // Hide all, show search
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById('searchSection').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('topTitle').textContent = 'Busca';
+  document.getElementById('topSubtitle').textContent = `Resultados para "${query}"`;
+  document.getElementById('searchDesc').textContent = `Resultados para "${query}"`;
+
+  const results = ALL_SETTINGS.filter(item =>
+    item.name.toLowerCase().includes(q) ||
+    item.desc.toLowerCase().includes(q) ||
+    item.cmd.toLowerCase().includes(q)
+  );
+
+  const container = document.getElementById('searchResults');
+  container.innerHTML = '';
+
+  const empty = document.getElementById('searchEmpty');
+  if (results.length === 0) {
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    results.forEach(item => container.appendChild(buildCard(item, query.trim())));
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   THEME TOGGLE
+   ════════════════════════════════════════════════════════════════ */
+function initTheme() {
+  const saved = localStorage.getItem('rcc-theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const theme = saved || (prefersDark ? 'dark' : 'light');
+  applyTheme(theme);
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('rcc-theme', theme);
+  const icon = document.getElementById('themeIcon');
+  if (theme === 'dark') {
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  } else {
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   INIT
+   ════════════════════════════════════════════════════════════════ */
+function init() {
+  buildSearchIndex();
+  initTheme();
+
+  // Populate Home - Quick Access
+  const quickGrid = document.getElementById('quickAccess');
+  QUICK_ACCESS.forEach(catId => {
+    const cat = CATEGORIES.find(c => c.id === catId);
+    if (!cat) return;
+    const card = document.createElement('div');
+    card.className = 'quick-card';
+    card.innerHTML = `
+      <div class="quick-card-icon ${cat.color}">${getIcon(cat.icon)}</div>
+      <div class="quick-card-name">${cat.name}</div>`;
+    card.addEventListener('click', () => navigateTo(catId));
+    quickGrid.appendChild(card);
+  });
+
+  // Populate Home - All Categories
+  const allCatGrid = document.getElementById('allCategories');
+  CATEGORIES.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-icon-wrap ${cat.color}">${getIcon(cat.icon)}</div>
+      <div class="card-name">${cat.name}</div>
+      <div class="card-desc">${cat.desc}</div>
+      <div class="card-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>`;
+    card.addEventListener('click', () => navigateTo(cat.id));
+    allCatGrid.appendChild(card);
+  });
+
+  // Populate all settings sections
+  populateGrid('aparenciaCards1',    SETTINGS.aparencia1);
+  populateGrid('aparenciaCards2',    SETTINGS.aparencia2);
+  populateGrid('aparenciaCards3',    SETTINGS.aparencia3);
+  populateGrid('aparenciaCards4',    SETTINGS.aparencia4);
+  populateGrid('desktopCards',       SETTINGS.desktop);
+  populateGrid('janelasCards1',      SETTINGS.janelas1);
+  populateGrid('janelasCards2',      SETTINGS.janelas2);
+  populateGrid('janelasCards3',      SETTINGS.janelas3);
+  populateGrid('notificacoesCards',  SETTINGS.notificacoes);
+  populateGrid('displayCards',       SETTINGS.display);
+  populateGrid('audioCards',         SETTINGS.audio);
+  populateGrid('inputCards1',        SETTINGS.input1);
+  populateGrid('inputCards2',        SETTINGS.input2);
+  populateGrid('inputCards3',        SETTINGS.input3);
+  populateGrid('energiaCards',       SETTINGS.energia);
+  populateGrid('impressorasCards',   SETTINGS.impressoras);
+  populateGrid('redeCards',          SETTINGS.rede);
+  populateGrid('bluetoothCards',     SETTINGS.bluetooth);
+  populateGrid('usuariosCards',      SETTINGS.usuarios);
+  populateGrid('segurancaCards',     SETTINGS.seguranca);
+  populateGrid('appsCards1',         SETTINGS.apps1);
+  populateGrid('appsCards2',         SETTINGS.apps2);
+  populateGrid('acessibilidadeCards',SETTINGS.acessibilidade);
+  populateGrid('sistemaCards1',      SETTINGS.sistema1);
+  populateGrid('sistemaCards2',      SETTINGS.sistema2);
+  populateGrid('sistemaCards3',      SETTINGS.sistema3);
+  populateGrid('sistemaCards4',      SETTINGS.sistema4);
+
+  // Sidebar navigation
+  document.querySelectorAll('.nav-item[data-section]').forEach(item => {
+    item.addEventListener('click', () => {
+      const section = item.getAttribute('data-section');
+      navigateTo(section);
+    });
+  });
+
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
+    applyTheme(current === 'dark' ? 'light' : 'dark');
+  });
+
+  // Global search
+  const searchInput = document.getElementById('globalSearch');
+  let searchDebounce;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => doSearch(e.target.value), 180);
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      navigateTo('home');
+    }
+  });
+
+  // Keyboard nav: Ctrl+F to focus search
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

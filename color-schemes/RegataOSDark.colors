@@ -1,0 +1,185 @@
+# SPDX-FileCopyrightText: RegataOS Project
+# SPDX-License-Identifier: LGPL-2.0-or-later
+#
+# RegataOS Dark Color Scheme
+# Gerado a partir do dark mode do Regata Control Center (CSS vars → KDE tokens)
+#
+# ┌──────────────────────────────────────────────────────────────┐
+# │  CSS var [data-theme=dark]    → KDE token       valor        │
+# ├──────────────────────────────────────────────────────────────┤
+# │  --bg          #12141f        → Window BG        18,20,31    │
+# │  --bg-card     #1c1f2e        → View/Button BG   28,31,46    │
+# │  --bg-sidebar  #0e1018        → Header/WM/Compl. 14,16,24    │
+# │  --text        #e8eaf0        → ForegroundNormal 232,234,240 │
+# │  --text-muted  #8892a4        → FGInactive       136,146,164 │
+# │  --text-sidebar#c8ccd8        → FGInactive dark  200,204,216 │
+# │  --accent      #5b6cf8        → Focus/Selection  91,108,248  │
+# │  --accent-2    #7c3aed        → Link/Visited     124,58,237  │
+# └──────────────────────────────────────────────────────────────┘
+
+[ColorEffects:Disabled]
+Color=56,56,56
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+IntensityAmount=0.1
+IntensityEffect=2
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=112,111,110
+ColorAmount=0.025
+ColorEffect=2
+ContrastAmount=0.1
+ContrastEffect=2
+Enable=false
+IntensityAmount=0
+IntensityEffect=0
+
+# ── Botões ────────────────────────────────────────────────────────────────────
+# --bg-card #1c1f2e → superfície de botão
+[Colors:Button]
+BackgroundAlternate=37,40,64
+BackgroundNormal=28,31,46
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=136,146,164
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=136,146,164
+
+# ── Complementary (painéis, sidebar escura) ───────────────────────────────────
+# --bg-sidebar #0e1018 → o mais escuro do app
+[Colors:Complementary]
+BackgroundAlternate=18,20,31
+BackgroundNormal=14,16,24
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+# ── Header (titlebar, topbar) ─────────────────────────────────────────────────
+# --bg-sidebar #0e1018 → cabeçalho/titlebar
+[Colors:Header]
+BackgroundAlternate=18,20,31
+BackgroundNormal=14,16,24
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:Header][Inactive]
+BackgroundAlternate=14,16,24
+BackgroundNormal=18,20,31
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+# ── Seleção ───────────────────────────────────────────────────────────────────
+# --accent #5b6cf8 como cor de seleção
+[Colors:Selection]
+BackgroundAlternate=58,75,196
+BackgroundNormal=91,108,248
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=232,234,240
+ForegroundInactive=200,204,216
+ForegroundLink=246,116,0
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+# ── Tooltip ───────────────────────────────────────────────────────────────────
+# --bg-sidebar #0e1018, mesmo tom escuro do header
+[Colors:Tooltip]
+BackgroundAlternate=18,20,31
+BackgroundNormal=14,16,24
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+# ── View (listas, áreas de conteúdo) ─────────────────────────────────────────
+# --bg-card #1c1f2e normal, alternado um step abaixo
+[Colors:View]
+BackgroundAlternate=25,28,42
+BackgroundNormal=28,31,46
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=136,146,164
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=136,146,164
+
+# ── Window (fundo geral da janela) ────────────────────────────────────────────
+# --bg #12141f normal, alternado um step acima
+[Colors:Window]
+BackgroundAlternate=26,29,44
+BackgroundNormal=18,20,31
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=136,146,164
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=136,146,164
+
+[General]
+ColorScheme=RegataOSDark
+Name=RegataOS Dark
+shadeSortColumn=true
+
+[KDE]
+contrast=4
+
+# ── Gerenciador de janelas ────────────────────────────────────────────────────
+# activeBackground  = --bg-sidebar #0e1018 → 14,16,24
+# activeForeground  = --text #e8eaf0       → 232,234,240
+# inactiveBackground = um step ainda mais escuro
+# inactiveForeground = --text-muted #8892a4 → 136,146,164
+[WM]
+activeBackground=14,16,24
+activeBlend=232,234,240
+activeForeground=232,234,240
+inactiveBackground=10,12,20
+inactiveBlend=136,146,164
+inactiveForeground=136,146,164

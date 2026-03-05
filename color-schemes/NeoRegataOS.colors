@@ -1,0 +1,169 @@
+# SPDX-FileCopyrightText: RegataOS Project
+# SPDX-License-Identifier: LGPL-2.0-or-later
+#
+# RegataOS Color Scheme
+# Gerado a partir do Regata Control Center (CSS vars → KDE tokens)
+#
+# Light mode com header/titlebar/sidebar escuro
+#
+# ┌─────────────────────────────────────────────────────────┐
+# │  CSS var              → KDE token          valor        │
+# ├─────────────────────────────────────────────────────────┤
+# │  --bg        #f0f2f5  → Window/Button BG   240,242,245  │
+# │  --bg-card   #ffffff  → View BG            255,255,255  │
+# │  --text      #1c1e2b  → ForegroundNormal   28,30,43     │
+# │  --text-muted#6b7280  → ForegroundInactive 107,114,128  │
+# │  --accent    #5b6cf8  → Accent/Focus/Sel.  91,108,248   │
+# │  --accent-2  #7c3aed  → Link/Visited       124,58,237   │
+# │  --bg-sidebar#1a1d2e  → Header/WM/Compl.   26,29,46     │
+# │  --text-light#e8eaf0  → Header FG normal   232,234,240  │
+# │  --text-sideb#c8ccd8  → Header FG inactive 200,204,216  │
+# └─────────────────────────────────────────────────────────┘
+
+[ColorEffects:Disabled]
+Color=56,56,56
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+IntensityAmount=0.1
+IntensityEffect=2
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=112,111,110
+ColorAmount=0.025
+ColorEffect=2
+ContrastAmount=0.1
+ContrastEffect=2
+Enable=false
+IntensityAmount=0
+IntensityEffect=0
+
+[Colors:Button]
+BackgroundAlternate=220,222,228
+BackgroundNormal=240,242,245
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=107,114,128
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=28,30,43
+ForegroundPositive=39,174,96
+ForegroundVisited=107,114,128
+
+[Colors:Complementary]
+BackgroundAlternate=36,40,58
+BackgroundNormal=26,29,46
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:Header]
+BackgroundAlternate=36,40,58
+BackgroundNormal=26,29,46
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:Header][Inactive]
+BackgroundAlternate=26,29,46
+BackgroundNormal=36,40,58
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:Selection]
+BackgroundAlternate=60,75,200
+BackgroundNormal=91,108,248
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=255,255,255
+ForegroundInactive=232,234,240
+ForegroundLink=246,116,0
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=255,255,255
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:Tooltip]
+BackgroundAlternate=36,40,58
+BackgroundNormal=26,29,46
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=200,204,216
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=232,234,240
+ForegroundPositive=39,174,96
+ForegroundVisited=200,204,216
+
+[Colors:View]
+BackgroundAlternate=240,242,245
+BackgroundNormal=255,255,255
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=107,114,128
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=28,30,43
+ForegroundPositive=39,174,96
+ForegroundVisited=107,114,128
+
+[Colors:Window]
+BackgroundAlternate=220,222,228
+BackgroundNormal=240,242,245
+DecorationFocus=91,108,248
+DecorationHover=124,143,249
+ForegroundActive=91,108,248
+ForegroundInactive=107,114,128
+ForegroundLink=124,58,237
+ForegroundNegative=218,68,83
+ForegroundNeutral=246,116,0
+ForegroundNormal=28,30,43
+ForegroundPositive=39,174,96
+ForegroundVisited=107,114,128
+
+[General]
+ColorScheme=RegataOS
+Name=RegataOS
+shadeSortColumn=true
+
+[KDE]
+contrast=4
+
+[WM]
+activeBackground=26,29,46
+activeBlend=232,234,240
+activeForeground=232,234,240
+inactiveBackground=18,20,32
+inactiveBlend=200,204,216
+inactiveForeground=200,204,216
