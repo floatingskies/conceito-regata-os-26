@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
-# ══════════════════════════════════════════════════════════════════════════════
 #  Regata Control Center — Script de Instalação
 #  Instala em ~/.local/share/regata-control-center e registra no menu do KDE
-# ══════════════════════════════════════════════════════════════════════════════
 
 set -euo pipefail
 
-# ── Cores ────────────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
 BLUE='\033[0;34m'; BOLD='\033[1m'; NC='\033[0m'
 
@@ -15,7 +12,6 @@ success() { echo -e "${GREEN}[OK]${NC}    $*"; }
 warn()    { echo -e "${YELLOW}[AVISO]${NC} $*"; }
 error()   { echo -e "${RED}[ERRO]${NC}  $*" >&2; exit 1; }
 
-# ── Paths ─────────────────────────────────────────────────────────────────────
 INSTALL_DIR="${HOME}/.local/share/regata-control-center"
 BIN_DIR="${HOME}/.local/bin"
 APP_DIR="${HOME}/.local/share/applications"
@@ -23,7 +19,6 @@ ICON_DIR="${HOME}/.local/share/icons/hicolor/scalable/apps"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# ── Verificações ─────────────────────────────────────────────────────────────
 echo -e "\n${BOLD}Regata Control Center — Instalador${NC}"
 echo "────────────────────────────────────────"
 
@@ -57,19 +52,16 @@ if [ "$HAS_PYQT" = false ]; then
     fi
 fi
 
-# ── Criar diretórios ─────────────────────────────────────────────────────────
 info "Criando diretórios..."
 mkdir -p "$INSTALL_DIR" "$BIN_DIR" "$APP_DIR" "$ICON_DIR"
 success "Diretórios criados"
 
-# ── Copiar arquivos ───────────────────────────────────────────────────────────
 info "Instalando arquivos em $INSTALL_DIR..."
 cp -f "$SCRIPT_DIR/regata-control-center.html" "$INSTALL_DIR/"
 cp -f "$SCRIPT_DIR/regata-control-center.py"   "$INSTALL_DIR/"
 chmod +x "$INSTALL_DIR/regata-control-center.py"
 success "Arquivos copiados"
 
-# ── Script executável em ~/.local/bin ────────────────────────────────────────
 info "Criando executável em $BIN_DIR..."
 cat > "$BIN_DIR/regata-control-center" << 'LAUNCHER'
 #!/usr/bin/env bash
@@ -78,7 +70,6 @@ LAUNCHER
 chmod +x "$BIN_DIR/regata-control-center"
 success "Executável criado: $BIN_DIR/regata-control-center"
 
-# ── Ícone SVG ─────────────────────────────────────────────────────────────────
 info "Instalando ícone..."
 cat > "$ICON_DIR/regata-control-center.svg" << 'SVG'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -99,7 +90,6 @@ cat > "$ICON_DIR/regata-control-center.svg" << 'SVG'
 SVG
 success "Ícone instalado"
 
-# ── Arquivo .desktop ──────────────────────────────────────────────────────────
 info "Registrando no menu de aplicativos..."
 cat > "$APP_DIR/regata-control-center.desktop" << DESKTOP
 [Desktop Entry]
@@ -123,7 +113,6 @@ DESKTOP
 
 success "Arquivo .desktop criado"
 
-# ── Atualizar cache de ícones e apps ─────────────────────────────────────────
 info "Atualizando cache do sistema..."
 if command -v update-desktop-database &>/dev/null; then
     update-desktop-database "$APP_DIR" 2>/dev/null || true
@@ -138,14 +127,12 @@ elif command -v kbuildsycoca5 &>/dev/null; then
 fi
 success "Cache atualizado"
 
-# ── Verificar PATH ────────────────────────────────────────────────────────────
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
     warn "$BIN_DIR não está no seu PATH."
     echo "  Adicione ao ~/.bashrc ou ~/.profile:"
     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
 
-# ── Resumo ────────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${BOLD}${GREEN}✓ Instalação concluída!${NC}"
 echo "────────────────────────────────────────"
