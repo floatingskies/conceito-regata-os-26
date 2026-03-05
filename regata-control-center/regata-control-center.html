@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RegataOS Control Center</title>
   <style>
-    /* ─── Variables ──────────────────────────────────────────────── */
     :root {
       --bg:          #f0f2f5;
       --bg-card:     #ffffff;
@@ -44,14 +43,10 @@
       --shadow-hover:0 6px 24px rgba(91,108,248,0.28);
     }
 
-    /* ─── Reset ──────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; font-family: var(--font); background: var(--bg); color: var(--text); }
 
-    /* ─── Layout ─────────────────────────────────────────────────── */
     .app { display: flex; height: 100vh; overflow: hidden; }
-
-    /* ─── Sidebar ────────────────────────────────────────────────── */
     .sidebar {
       width: var(--sidebar-w);
       min-width: var(--sidebar-w);
@@ -156,7 +151,6 @@
     }
     .nav-item.active .nav-icon, .nav-item:hover .nav-icon { opacity: 1; }
 
-    /* ─── Main Area ───────────────────────────────────────────────── */
     .main {
       flex: 1;
       display: flex;
@@ -193,12 +187,10 @@
     .btn-icon:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
     .btn-icon svg { width: 16px; height: 16px; }
 
-    /* ─── Content ────────────────────────────────────────────────── */
     .content { flex: 1; overflow-y: auto; padding: 24px; }
     .content::-webkit-scrollbar { width: 5px; }
     .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* ─── Section ────────────────────────────────────────────────── */
     .section { display: none; animation: fadeIn 0.2s ease; }
     .section.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
@@ -360,7 +352,6 @@
     .quick-card-icon svg { width: 16px; height: 16px; }
     .quick-card-name { font-size: 12px; font-weight: 600; color: var(--text); }
 
-    /* ─── Badge ──────────────────────────────────────────────────── */
     .badge {
       display: inline-block;
       background: rgba(91,108,248,0.14);
@@ -391,7 +382,6 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast svg { width: 16px; height: 16px; color: var(--accent); flex-shrink: 0; }
 
-    /* ─── Scrollbar ──────────────────────────────────────────────── */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -410,7 +400,6 @@
 
 <div class="app" id="app">
 
-  <!-- ─── Sidebar ──────────────────────────────────────────────── -->
   <aside class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-icon">
@@ -529,7 +518,6 @@
     </nav>
   </aside>
 
-  <!-- ─── Main ──────────────────────────────────────────────────── -->
   <div class="main">
     <div class="topbar">
       <div>
@@ -857,12 +845,8 @@
 </div>
 
 <script>
-/* ════════════════════════════════════════════════════════════════
-   DATA — All KCM settings with commands
-   ════════════════════════════════════════════════════════════════ */
 const SETTINGS = {
 
-  // ── APARÊNCIA ────────────────────────────────────────────────
   aparencia1: [
     { name: 'Tema Global',        desc: 'Aplicar tema completo ao sistema',     color: 'c-purple', cmd: 'kcmshell6 kcm_lookandfeel', icon: 'palette' },
     { name: 'Tema do Plasma',     desc: 'Estilo de painéis e widgets',          color: 'c-purple', cmd: 'kcmshell6 kcm_plasmadesktoptheme', icon: 'layers' },
@@ -886,7 +870,6 @@ const SETTINGS = {
     { name: 'Tela de Splash',        desc: 'Animação de inicialização do Plasma', color: 'c-purple', cmd: 'kcmshell6 kcm_splashscreen', icon: 'loader' },
   ],
 
-  // ── DESKTOP ──────────────────────────────────────────────────
   desktop: [
     { name: 'Configurar Desktop',  desc: 'Layout e comportamento geral da área de trabalho', color: 'c-blue',  cmd: 'qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "var d=desktops()[0];d.wallpaperPlugin=d.wallpaperPlugin"', icon: 'monitor' },
     { name: 'Painel (Taskbar)',    desc: 'Adicionar, mover e configurar painéis',   color: 'c-indigo', cmd: 'plasma-open-settings kcm_taskmanager', icon: 'sidebar' },
@@ -898,7 +881,6 @@ const SETTINGS = {
     { name: 'Miniaplicativos de Sistema', desc: 'Área de notificação e bandejas', color: 'c-slate', cmd: 'plasma-open-settings kcm_statusnotifieritem', icon: 'bell' },
   ],
 
-  // ── JANELAS ──────────────────────────────────────────────────
   janelas1: [
     { name: 'Comportamento de Janelas', desc: 'Foco, movimento e redimensionamento', color: 'c-indigo', cmd: 'kcmshell6 kcm_kwin_behaviour', icon: 'move' },
     { name: 'Ações de Janelas',  desc: 'Clique duplo, botões e ações da barra', color: 'c-blue',  cmd: 'kcmshell6 kcm_kwin_actions', icon: 'click' },
@@ -923,7 +905,6 @@ const SETTINGS = {
     { name: 'Modo Não Perturbe', desc: 'Silenciar notificações por período',    color: 'c-slate',  cmd: 'kcmshell6 kcm_notifications', icon: 'moon' },
   ],
 
-  // ── DISPLAY ──────────────────────────────────────────────────
   display: [
     { name: 'Configurações de Monitor', desc: 'Resolução, taxa de atualização e escala', color: 'c-cyan',   cmd: 'kcmshell6 kcm_kscreen', icon: 'monitor' },
     { name: 'Escala da Interface', desc: 'DPI e fator de escala por monitor',    color: 'c-blue',   cmd: 'kcmshell6 kcm_kscreen', icon: 'zoom-in' },
@@ -932,14 +913,12 @@ const SETTINGS = {
     { name: 'HDR e Wide Color Gamut', desc: 'Configurações de HDR (Plasma 6)', color: 'c-purple', cmd: 'kcmshell6 kcm_kscreen', icon: 'eye' },
   ],
 
-  // ── ÁUDIO ────────────────────────────────────────────────────
   audio: [
     { name: 'Volume e Dispositivos', desc: 'Controle de volume e saída de áudio', color: 'c-green',  cmd: 'kcmshell6 kcm_pulseaudio', icon: 'volume-2' },
     { name: 'Configurações de Áudio', desc: 'PipeWire/PulseAudio e dispositivos', color: 'c-teal',  cmd: 'pavucontrol', icon: 'sliders' },
     { name: 'Entrada de Áudio (Mic)', desc: 'Microfone e entrada de som',       color: 'c-cyan',   cmd: 'kcmshell6 kcm_pulseaudio', icon: 'mic' },
   ],
 
-  // ── INPUT ────────────────────────────────────────────────────
   input1: [
     { name: 'Layout do Teclado',  desc: 'Idioma, layout e variante de teclado', color: 'c-teal',   cmd: 'kcmshell6 kcm_keyboard', icon: 'keyboard' },
     { name: 'Comportamento do Teclado', desc: 'Velocidade de repetição e atraso', color: 'c-blue',  cmd: 'kcmshell6 kcm_keyboard', icon: 'type' },
@@ -956,7 +935,6 @@ const SETTINGS = {
     { name: 'Joystick e Gamepad', desc: 'Controladores de jogo conectados',    color: 'c-orange', cmd: 'kcmshell6 kcm_joystick', icon: 'gamepad' },
   ],
 
-  // ── ENERGIA ──────────────────────────────────────────────────
   energia: [
     { name: 'Gerenciamento de Energia', desc: 'Perfis: Economia, Balanceado, Performance', color: 'c-orange', cmd: 'kcmshell6 kcm_powerdevil', icon: 'battery' },
     { name: 'Suspensão e Hibernação', desc: 'Quando suspender e hibernar',    color: 'c-yellow', cmd: 'kcmshell6 kcm_powerdevil', icon: 'moon' },
@@ -964,13 +942,11 @@ const SETTINGS = {
     { name: 'Estatísticas de Energia', desc: 'Histórico de consumo energético', color: 'c-green', cmd: 'kcmshell6 kcm_energyinfo', icon: 'trending-down' },
   ],
 
-  // ── IMPRESSORAS ──────────────────────────────────────────────
   impressoras: [
     { name: 'Impressoras',        desc: 'Adicionar e gerenciar impressoras',    color: 'c-slate',  cmd: 'kcmshell6 kcm_printer_manager', icon: 'printer' },
     { name: 'Scanners',           desc: 'Dispositivos de digitalização',        color: 'c-blue',   cmd: 'skanlite', icon: 'scan' },
   ],
 
-  // ── REDE ─────────────────────────────────────────────────────
   rede: [
     { name: 'Conexões de Rede',   desc: 'Wi-Fi, Ethernet e configurações',     color: 'c-blue',   cmd: 'kcmshell6 kcm_networkmanagement', icon: 'wifi' },
     { name: 'VPN',                desc: 'Configurar e gerenciar VPNs',          color: 'c-indigo', cmd: 'kcmshell6 kcm_networkmanagement', icon: 'lock' },
@@ -980,13 +956,11 @@ const SETTINGS = {
     { name: 'Preferências de Rede', desc: 'DNS, IPv6 e configurações avançadas', color: 'c-cyan', cmd: 'kcmshell6 kcm_networkmanagement', icon: 'settings' },
   ],
 
-  // ── BLUETOOTH ────────────────────────────────────────────────
   bluetooth: [
     { name: 'Dispositivos Bluetooth', desc: 'Emparelhar e conectar dispositivos', color: 'c-indigo', cmd: 'kcmshell6 kcm_bluetooth', icon: 'bluetooth' },
     { name: 'Configurações Bluetooth', desc: 'Visibilidade e comportamento',   color: 'c-blue',   cmd: 'kcmshell6 kcm_bluetooth', icon: 'settings' },
   ],
 
-  // ── USUÁRIOS ─────────────────────────────────────────────────
   usuarios: [
     { name: 'Contas de Usuário',  desc: 'Gerenciar usuários do sistema',        color: 'c-green',  cmd: 'kcmshell6 kcm_users', icon: 'user' },
     { name: 'Contas Online',      desc: 'Google, Nextcloud e serviços web',     color: 'c-blue',   cmd: 'kcmshell6 kcm_kaccounts', icon: 'cloud' },
@@ -994,7 +968,6 @@ const SETTINGS = {
     { name: 'Sincronização KDE',  desc: 'Sincronizar configurações na nuvem',   color: 'c-purple', cmd: 'kcmshell6 kcm_kaccounts', icon: 'refresh-cw' },
   ],
 
-  // ── SEGURANÇA ────────────────────────────────────────────────
   seguranca: [
     { name: 'Senha de Usuário',   desc: 'Alterar senha do usuário atual',       color: 'c-red',    cmd: 'kcmshell6 kcm_users', icon: 'lock' },
     { name: 'Privacidade',        desc: 'Histórico de arquivos e atividades',   color: 'c-orange', cmd: 'kcmshell6 kcm_kprivacy', icon: 'eye-off' },
@@ -1003,7 +976,6 @@ const SETTINGS = {
     { name: 'KDE Vault',          desc: 'Pastas criptografadas',                color: 'c-indigo', cmd: 'plasma-open-settings kcm_plasmavault', icon: 'hard-drive' },
   ],
 
-  // ── APPS ─────────────────────────────────────────────────────
   apps1: [
     { name: 'Apps Padrão',        desc: 'Navegador, email, editor padrão',      color: 'c-purple', cmd: 'kcmshell6 kcm_componentchooser', icon: 'star' },
     { name: 'Associações de Arquivo', desc: 'Qual app abre cada tipo de arquivo', color: 'c-blue', cmd: 'kcmshell6 kcm_filetypes', icon: 'file' },
@@ -1017,7 +989,6 @@ const SETTINGS = {
     { name: 'Integração com Navegador', desc: 'Plasma Browser Integration',   color: 'c-blue',   cmd: 'kcmshell6 kcm_browser_integration', icon: 'globe' },
   ],
 
-  // ── ACESSIBILIDADE ───────────────────────────────────────────
   acessibilidade: [
     { name: 'Acessibilidade',     desc: 'Leitor de tela, teclas pegajosas',     color: 'c-teal',   cmd: 'kcmshell6 kcm_accessibility', icon: 'eye' },
     { name: 'Aumento de Texto',   desc: 'Zoom de fonte e legibilidade',         color: 'c-blue',   cmd: 'kcmshell6 kcm_fonts', icon: 'zoom-in' },
@@ -1025,7 +996,6 @@ const SETTINGS = {
     { name: 'Alto Contraste',     desc: 'Tema de alto contraste para daltonismo', color: 'c-orange', cmd: 'kcmshell6 kcm_colors', icon: 'contrast' },
   ],
 
-  // ── SISTEMA ──────────────────────────────────────────────────
   sistema1: [
     { name: 'Sobre este Sistema', desc: 'Hardware, kernel e versão do OS',      color: 'c-slate',  cmd: 'kcmshell6 kcm_about-distro', icon: 'info' },
     { name: 'Monitor do Sistema', desc: 'CPU, RAM, disco e processos',          color: 'c-green',  cmd: 'ksysguard', icon: 'activity' },
@@ -1048,10 +1018,6 @@ const SETTINGS = {
     { name: 'Sincronização NTP',  desc: 'Sincronizar relógio pela internet',   color: 'c-cyan',   cmd: 'kcmshell6 kcm_clock', icon: 'wifi' },
   ],
 };
-
-/* ════════════════════════════════════════════════════════════════
-   ICONS SVG Map
-   ════════════════════════════════════════════════════════════════ */
 const ICONS = {
   palette:      `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`,
   layers:       `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
@@ -1129,9 +1095,6 @@ function getIcon(name) {
   return ICONS[name] || ICONS['settings'];
 }
 
-/* ════════════════════════════════════════════════════════════════
-   CATEGORY META for Home page
-   ════════════════════════════════════════════════════════════════ */
 const CATEGORIES = [
   { id: 'aparencia',      name: 'Aparência',          desc: 'Temas, cores, fontes e ícones',     color: 'c-purple', icon: 'palette' },
   { id: 'desktop',        name: 'Desktop e Painel',   desc: 'Wallpaper, widgets e painéis',      color: 'c-blue',   icon: 'monitor' },
@@ -1153,9 +1116,6 @@ const CATEGORIES = [
 
 const QUICK_ACCESS = ['aparencia', 'display', 'rede', 'audio', 'energia', 'input', 'seguranca', 'apps'];
 
-/* ════════════════════════════════════════════════════════════════
-   FLAT LIST for search
-   ════════════════════════════════════════════════════════════════ */
 let ALL_SETTINGS = [];
 function buildSearchIndex() {
   Object.entries(SETTINGS).forEach(([key, items]) => {
@@ -1165,9 +1125,7 @@ function buildSearchIndex() {
   });
 }
 
-/* ════════════════════════════════════════════════════════════════
-   CARD BUILDER
-   ════════════════════════════════════════════════════════════════ */
+
 function buildCard(item, highlight = '') {
   let name = item.name;
   let desc = item.desc;
@@ -1198,9 +1156,6 @@ function populateGrid(containerId, items) {
   items.forEach(item => el.appendChild(buildCard(item)));
 }
 
-/* ════════════════════════════════════════════════════════════════
-   LAUNCH SETTING
-   ════════════════════════════════════════════════════════════════ */
 function launchSetting(item) {
   // Try to open via Qt/xdg-open bridge, fallback to showing command
   const cmd = item.cmd;
@@ -1228,9 +1183,6 @@ function launchSetting(item) {
   showToast(`Abrindo ${item.name}…`);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   TOAST
-   ════════════════════════════════════════════════════════════════ */
 let toastTimer = null;
 function showToast(msg) {
   const toast = document.getElementById('toast');
@@ -1241,9 +1193,6 @@ function showToast(msg) {
   toastTimer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-/* ════════════════════════════════════════════════════════════════
-   NAVIGATION
-   ════════════════════════════════════════════════════════════════ */
 const SECTION_META = {
   home:           { title: 'Início',                subtitle: 'Central de Configurações Regata OS' },
   aparencia:      { title: 'Aparência',             subtitle: 'Temas, cores, fontes e ícones' },
@@ -1286,9 +1235,6 @@ function navigateTo(section) {
   document.getElementById('mainContent').scrollTop = 0;
 }
 
-/* ════════════════════════════════════════════════════════════════
-   SEARCH
-   ════════════════════════════════════════════════════════════════ */
 function doSearch(query) {
   const q = query.trim().toLowerCase();
 
@@ -1324,9 +1270,6 @@ function doSearch(query) {
   }
 }
 
-/* ════════════════════════════════════════════════════════════════
-   THEME TOGGLE
-   ════════════════════════════════════════════════════════════════ */
 function initTheme() {
   const saved = localStorage.getItem('rcc-theme');
   const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1344,9 +1287,6 @@ function applyTheme(theme) {
   }
 }
 
-/* ════════════════════════════════════════════════════════════════
-   INIT
-   ════════════════════════════════════════════════════════════════ */
 function init() {
   buildSearchIndex();
   initTheme();
